@@ -13,8 +13,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'webgl-core': ['src/lib/webglContext.ts', 'src/lib/shaderLoader.ts', 'src/lib/textureLoader.ts'],
-          'scene': ['src/scene/RenderPipeline.ts', 'src/scene/BackgroundPass.ts', 'src/scene/AvatarPass.ts', 'src/scene/BlurPass.ts', 'src/scene/CompositePass.ts'],
+          'webgl-core': ['@/lib/webglContext', '@/lib/shaderLoader', '@/lib/textureLoader'],
+          'scene': ['@/scene/RenderPipeline', '@/scene/BackgroundPass', '@/scene/AvatarPass', '@/scene/BlurPass', '@/scene/CompositePass'],
         },
       },
     },
@@ -22,5 +22,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    open: true, // Автоматически открывать браузер
   },
+  assetsInclude: ['**/*.glsl'], // Включаем .glsl файлы как статические ресурсы
 });

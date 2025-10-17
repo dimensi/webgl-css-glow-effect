@@ -3,13 +3,17 @@
  */
 
 import { test, expect } from '@playwright/test';
-import * as pixelmatch from 'pixelmatch';
+import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const BROWSERS = ['chromium', 'webkit', 'firefox'] as const;
-const VIEWPORT = { width: 1280, height: 720 };
+const VIEWPORT = { width: 1714, height: 1284 }; // Соответствует размеру baseline изображения
 const BASELINE_PATH = path.join(__dirname, '../../public/example.png');
 const THRESHOLD = 0.01; // 1% pixel difference allowed
 
@@ -41,6 +45,13 @@ for (const browserType of BROWSERS) {
     const baselineImg = PNG.sync.read(fs.readFileSync(BASELINE_PATH));
     const currentImg = PNG.sync.read(screenshot);
     
+    // Проверить, что размеры совпадают
+    if (baselineImg.width !== currentImg.width || baselineImg.height !== currentImg.height) {
+      throw new Error(
+        `Image size mismatch: baseline ${baselineImg.width}x${baselineImg.height}, current ${currentImg.width}x${currentImg.height}`
+      );
+    }
+    
     const { width, height } = baselineImg;
     const diff = new PNG({ width, height });
     
@@ -58,6 +69,11 @@ for (const browserType of BROWSERS) {
     if (diffPercentage > THRESHOLD) {
       // Сохранить diff для отладки
       const diffPath = path.join(__dirname, `../fixtures/diff-${browserType}.png`);
+      // Создать папку fixtures если не существует
+      const fixturesDir = path.dirname(diffPath);
+      if (!fs.existsSync(fixturesDir)) {
+        fs.mkdirSync(fixturesDir, { recursive: true });
+      }
       fs.writeFileSync(diffPath, PNG.sync.write(diff));
       
       throw new Error(

@@ -27,12 +27,12 @@ void main() {
   
   for (int i = 0; i < uKernelSize; i++) {
     vec2 offset = uTexelSize * uOffsets[i];
-    vec4 sample = texture(uTexture, vUV + offset);
-    vec3 linear = srgbToLinear(sample.rgb);
+    vec4 texel = texture(uTexture, vUV + offset);
+    vec3 linear = srgbToLinear(texel.rgb);
     float weight = uWeights[i];
     
-    sum += linear * sample.a * weight;
-    alphaSum += sample.a * weight;
+    sum += linear * texel.a * weight;
+    alphaSum += texel.a * weight;
   }
   
   vec3 srgb = linearToSrgb(sum);
