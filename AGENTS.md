@@ -17,3 +17,25 @@ Adopt Conventional Commits (`feat:`, `fix:`, `chore:`) and keep each commit scop
 
 ## Visual & Performance Checks
 Profile new shader code with Spector.js or the browser devtools to avoid expensive fragment loops. Respect `prefers-reduced-motion` by offering CSS fallbacks and throttled animation timers. Confirm the glow effect degrades gracefully on systems lacking WebGL 2 by retaining a CSS-only fallback layer.
+
+## WebGL Passes
+The application uses a 4-pass rendering pipeline:
+
+1. **Background Pass**: Fills canvas with solid color `#25262d`
+2. **Avatar Pass**: Renders avatar to FBO with circular clipping (diameter = 30% canvas width)
+3. **Blur Pass**: Separable Gaussian blur (horizontal + vertical) for glow effect
+4. **Composite Pass**: Composites glow behind avatar with premultiplied alpha blending
+
+Each pass is implemented as a separate class in `src/scene/` with proper WebGL2/WebGL1 compatibility.
+
+## Shader Compilation
+Shaders are loaded from `assets/shaders/` and compiled at runtime. The system automatically handles WebGL2 (`#version 300 es`) and WebGL1 (no version directive) variants. All shaders include proper error handling and uniform location caching.
+
+## Testing Strategy
+- **Unit Tests**: Vitest with 80%+ branch coverage for `lib/` and `scene/` modules
+- **E2E Tests**: Playwright screenshot comparison with pixelmatch for visual regression testing
+- **Browser Support**: Chromium, WebKit (Safari), Firefox with deterministic rendering
+- **Baseline Management**: Automated baseline update via `npm run test:update`
+
+## Performance Profiling
+Use `?debug=1` query parameter to enable performance measurement. This shows timing for each render pass in the browser console, helping identify bottlenecks in the rendering pipeline.
